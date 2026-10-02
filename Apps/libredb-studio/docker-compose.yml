@@ -1,0 +1,99 @@
+# Configuration for libredb-studio setup
+
+# Name of the big-bear-libredb-studio application
+name: big-bear-libredb-studio
+# Service definitions for the big-bear-libredb-studio application
+services:
+  # Service name: big-bear-libredb-studio
+  # The `big-bear-libredb-studio` service definition
+  big-bear-libredb-studio:
+    # Name of the container
+    container_name: big-bear-libredb-studio
+    # Image to be used for the container, digest pinned
+    image: libredb/libredb-studio:0.17.0@sha256:ce4d58724e2507a4467bcce6702d00760475e0f339071d878fce83e90c99718f
+    # Container restart policy
+    restart: unless-stopped
+    # Volumes to be mounted to the container
+    volumes:
+      # Server side store: connections, query history and saved queries
+      - /DATA/AppData/$AppID/data:/app/data
+    # Ports mapping between host and container
+    ports:
+      # Mapping port 3016 of the host to port 3000 of the container
+      - "3016:3000"
+    # Environment variables for the container
+    environment:
+      # Address of the first administrator account
+      - ADMIN_EMAIL=admin@libredb.org
+      # Left empty on purpose: the container generates a password on first start
+      # and prints it to its own log, so no secret ships inside this file
+      - ADMIN_PASSWORD=
+      # Left empty on purpose: the container generates a signing secret on first start
+      - JWT_SECRET=
+      # SQLite keeps the store in the mounted volume above
+      - STORAGE_PROVIDER=sqlite
+      - STORAGE_SQLITE_PATH=/app/data/libredb-storage.db
+      # CasaOS serves this app over plain HTTP, so the auth cookie is not marked secure
+      - AUTH_COOKIE_SECURE=false
+    x-casaos:
+      envs:
+        - container: ADMIN_EMAIL
+          description:
+            en_US: 'Container Variable: ADMIN_EMAIL'
+        - container: ADMIN_PASSWORD
+          description:
+            en_US: 'Container Variable: ADMIN_PASSWORD. Leave empty and the app generates one on first start, then prints it to the container log.'
+        - container: JWT_SECRET
+          description:
+            en_US: 'Container Variable: JWT_SECRET. Leave empty and the app generates one on first start.'
+        - container: STORAGE_PROVIDER
+          description:
+            en_US: 'Container Variable: STORAGE_PROVIDER'
+        - container: STORAGE_SQLITE_PATH
+          description:
+            en_US: 'Container Variable: STORAGE_SQLITE_PATH'
+        - container: AUTH_COOKIE_SECURE
+          description:
+            en_US: 'Container Variable: AUTH_COOKIE_SECURE'
+      volumes:
+        - container: /app/data
+          description:
+            en_US: 'Container Path: /app/data'
+      ports:
+        - container: "3000"
+          description:
+            en_US: 'Container Port: 3000'
+x-casaos:
+  # Supported CPU architectures for this application
+  architectures:
+    - amd64
+    - arm64
+  # Stable reverse-domain app identifier
+  id: com.bigbeartechworld.libredb-studio
+  # Main service for this application
+  main: big-bear-libredb-studio
+  # Detailed description for the application
+  description:
+    en_US: Self hosted SQL IDE that runs in the browser. Eighteen drivers reach forty six named engines, among them PostgreSQL, MySQL, Oracle, SQL Server, SQLite, MongoDB, Redis and ClickHouse. Browse schemas, run queries with schema aware autocomplete, compare schemas and read query plans. Five of the eighteen drivers are read only. Optional AI query explanation uses a model key you supply, and with no AI settings nothing leaves the machine.
+  # Brief tagline for the application
+  tagline:
+    en_US: Browser based SQL IDE for eighteen database drivers
+  # Developer's information
+  developer: LibreDB
+  # Author of this particular configuration
+  author: LibreDB
+  # Icon URL for the application
+  icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/libredb-studio.png
+  # Thumbnail image for the application (if any)
+  thumbnail: ""
+  # Installation tips
+  tips:
+    before_install:
+      en_US: Leave ADMIN_PASSWORD and JWT_SECRET empty. On first start the app generates both and prints the administrator password to the container log.
+  # Title for the application
+  title:
+    en_US: LibreDB Studio
+  # Category under which the application falls
+  category: Developer
+  # Default port mapping for the application
+  port_map: "3016"
